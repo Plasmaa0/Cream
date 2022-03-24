@@ -1,5 +1,11 @@
 #include "Lexer.h"
-Lexer::Lexer(std::string FileName) : m_logger("LexerLogger"), m_reader(FileName)
+
+Lexer::Lexer(std::string FileName) : m_logger("LexerLogger"), m_reader(FileName), m_fileMode(true)
+{
+    ;
+}
+
+Lexer::Lexer(std::istream &is) : m_logger("LexerLogger"), m_reader(is), m_fileMode(false)
 {
     ;
 }
@@ -8,9 +14,14 @@ std::vector<Token> Lexer::GetRawTokensArray()
 {
     std::vector<Token> tokens;
     std::string line;
-    while (m_reader.IsReadable())
+    while (m_reader.IsReadable() or (not m_fileMode))
     {
         line = m_reader.GetLine();
+        if (line == "exit")
+        {
+            break;
+        }
+
         std::string tok_str;
         for (auto &&digit : line)
         {
@@ -335,17 +346,16 @@ std::vector<Token> Lexer::ParseMultidigitOperators(std::vector<Token> TokensArra
 
 std::vector<Token> Lexer::GetTokenArray()
 {
-    std::cout << "ok1" << std::endl;
+    m_logger.Log("Started lexical analyzis.", DEBUG);
     std::vector<Token> rawTokensArray = GetRawTokensArray();
-    std::cout << "ok2" << std::endl;
+    m_logger.Log("Got RAW tokens.", DEBUG);
     std::vector<Token> namesParsed = ParseNames(rawTokensArray);
-    std::cout << "ok3" << std::endl;
+    m_logger.Log("Parsed names.", DEBUG);
     std::vector<Token> numbersParsed = ParseNumbers(namesParsed);
-    std::cout << "ok4" << std::endl;
+    m_logger.Log("Parsed numbers.", DEBUG);
     std::vector<Token> multidigitOperatorsParsed = ParseMultidigitOperators(numbersParsed);
-    std::cout << "ok5" << std::endl;
+    m_logger.Log("Parsed operators.", DEBUG);
     std::vector<Token> stringsParsed = ParseStrings(multidigitOperatorsParsed);
-    std::cout << "ok6" << std::endl
-              << std::endl;
+    m_logger.Log("Parsed strings.", DEBUG);
     return stringsParsed;
 }
