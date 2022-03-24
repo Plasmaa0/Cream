@@ -8,7 +8,7 @@ INCLUDEDIR=include
 #objects
 SOURCES=$(wildcard $(SOURCEDIR)/*.cpp)
 OBJECTS=$(SOURCES:$(SOURCEDIR)/%.cpp=$(OBJDIR)/%.o)
-INCLUDES=$(SOURCES:$(SOURCEDIR)/%.cpp=$(INCLUDEDIR)/%.h)
+INCLUDES=$(filter-out $(INCLUDEDIR)/Main.h, $(SOURCES:$(SOURCEDIR)/%.cpp=$(INCLUDEDIR)/%.h))
 EXECUTABLE=cream.exe
 
 #compiler
@@ -24,10 +24,14 @@ clean:
 	rm -f $(EXECUTABLE)
 	@printf "finished cleaning\n"
 
+re: clean all
+
+rerun: re run
+
 run: $(EXECUTABLE)
 	$(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): $(OBJECTS) $(INCLUDES)
 	@printf "building executable '$@'\n"
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXECUTABLE)
 
